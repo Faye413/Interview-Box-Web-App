@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% include 'header.html' %}
+  <body>
+    <!-- <div class="container"> -->
+    <div class="bg-dashboard">
+
+    <div class="container page-container profile-page">
+        <!-- /.row -->
+
+        <div class="row">
+            <div class="col-md-offset-3 col-md-6 jumbotron ib-info-box">
+               <h2 id="success"></h2>
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+</div>
+    <!-- /.container -->
+  </body>
+</html>
+
+    <script>
+        function getSearchParameters() {
+          var prmstr = window.location.search.substr(1);
+          return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+        }
+
+        function transformToAssocArray( prmstr ) {
+            var params = {};
+            var prmarr = prmstr.split("&");
+            for ( var i = 0; i < prmarr.length; i++) {
+                var tmparr = prmarr[i].split("=");
+                params[tmparr[0]] = tmparr[1];
+            }
+            return params;
+        }
+
+        var params = getSearchParameters();
+
+        console.log(params);
+        if (params['interviewer']) {
+            localStorage.setItem("interviewer", params['interviewer']);
+        }
+
+        setTimeout(function(){document.location = params['go']}, 1000);
+
+        if (params['message'] != undefined)
+            document.getElementById("success").innerHTML += params['message'].replace("%20", " ")
+        if (params['message'] != undefined){
+            document.getElementById("success").innerHTML += decodeURIComponent(params['message']).replace("%20", " ");
+        } else {
+            document.getElementById("success").innerHTML += "Success!";
+
+        }
+
+    </script>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'header.html' %}
+<body>
+<div class="bg-dashboard">
+    {% include 'nav.html' %}
+    <div class="container page-container profile-page">
+        <div class="row">
+            <div class="col-md-offset-3 col-md-6 jumbotron ib-info-box">
+                <!-- <form class="form-signin" action="search_result" method="get"> -->
+                <div class="form-signin" id="search_wrapper">
+                    <h2 class="form-signin-heading">Search for an Interviewer</h2>
+
+                    <div class="form-group">
+                        <label for="firstname">Name</label><br>
+                        <input type="text" name="firstname" id="firstname" class="form-control ib-form-non-block" placeholder="First Name">
+                        <input type="text" name="lastname" id="lastname" class="form-control ib-form-non-block" placeholder="Last Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" name="position" id="position" class="form-control" placeholder="What position are you looking for?">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" name="company" id="company" class="form-control" placeholder="Do you have a company in mind?">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="date" name="date" id="date" class="form-control">
+                    </div>
+
+                    <!-- <div class="form-group">
+                        <label for="startTime">Start Time</label>
+                        <input type="time" name="startTime" class="form-control ib-form-non-block">
+                        <label for="endTime">End Time</label>
+                        <input type="time" name="endTime" class="form-control ib-form-non-block">
+                    </div> -->
+                    <div class="form-group">
+                        <label for="startTime">Start Time</label>
+                        <select type="time" name="start_time" id="start_time" class="form-control ib-form-non-block">
+                            {% for time_slot in times %}
+                                <option value="{{time_slot}}">{{time_slot}}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="endTime">End Time</label>
+                        <select type="time" name="end_time" id="end_time" class="form-control ib-form-non-block">
+                            {% for time_slot in times %}
+                                <option value="{{time_slot}}">{{time_slot}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button class="btn btn-lg btn-primary btn-block" onclick="search()">Search</button>
+                </div>         
+            </div>        
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Please select your interview time:</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+    function search() {
+        if ($("#date").val().trim() == "") {
+            alert("Please select a date.");
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '/api_search',
+            data: {
+                firstname: $("#firstname").val(),
+                lastname: $("#lastname").val(),
+                employment: $("#company").val(),
+                position: $("#position").val(),
+                date: $("#date").val(),
+                start_time: $("#start_time").val(),
+                end_time: $("#end_time").val()
+            },
+            success: function(data){
+                if (data.status == "success"){
+                    console.log(data.results)
+                    // window.location = "/profile";
+                    // alert("found "+data.results.length+" entries!");
+
+                    $("#search_wrapper").html("");
+                    table = $("#search_wrapper").append("<table class='table' id='result-table'></table>");
+                    $('#result-table').append("<tr><th>Name</th><th>Company</th><th>Position</th><th></th></tr>");
+                    for (var i in data.results){
+                        $('#result-table').append("<tr><td>"+data.results[i]['firstname']+" " + data.results[i]['lastname']+"</td><td>" + data.results[i]['employment'] + "</td><td>" + data.results[i]['position'] + "</td><td><button class='btn btn-default' id='" + data.results[i]['username'] + "' onclick='clickSchedule(this.id)' data-availability='" + data.results[i]['available_start_timestamps'].join(';')+ "' data-availability-display='" + data.results[i]['available_start_timestamps_display'].join(';')+ "' data-toggle='modal' data-target='#myModal'>Schedule Interview</button></td></tr>");                        
+                    }
+                } else {
+                    alert(data.message);
+                }
+            }
+        });
+    }
+
+    // $('#myModal').on('shown.bs.modal', function () {
+    //   $('#myInput').focus()
+    // })
+    function clickSchedule(clicked_id){
+        $('.modal-body').html("");
+        timestamps = $("#" + clicked_id).attr('data-availability').split(";");
+        displayTimes = $("#" + clicked_id).attr('data-availability-display').split(";");
+        for (var i in displayTimes){
+            $('.modal-body').append(
+                "<button class='btn btn-default' data-username='" + clicked_id + "' onclick='selectInterview(this.id)' id='time-select-"+i+"' data-timestamp='"+timestamps[i]+"'>"+displayTimes[i]+"</button>"
+                );
+        }
+    }
+
+    function selectInterview(clicked_time_id) {
+        $.ajax({
+            type: 'POST',
+            url: '/api_create_interview',
+            data: {
+                timestamp: $('#'+clicked_time_id).attr('data-timestamp'),
+                target_username: $('#'+clicked_time_id).attr('data-username')
+            },
+            success: function(data){
+                window.location="/profile";              
+            }
+        });
+    }
+</script>
+</body> 
+<html>
+
+

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'header.html' %}
+<body>
+<div class="bg-dashboard">
+    {% include 'nav.html' %}
+    <div class="container page-container profile-page">
+        <div class="row">
+            {% include 'interview.html' %}
+            <div class="col-xs-12 col-md-6 ib-info-box">
+                <div class="col-xs-8">
+                    <div class="form-group">
+                        <label for="firstname">Name</label><br>
+                        <input type="text" name="firstname" id="firstname" class="form-control ib-form-non-block" placeholder="First Name" required="">
+                        <input type="text" name="lastname" id="lastname" class="form-control ib-form-non-block" placeholder="Last Name" required="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employment">Company</label>
+                        <input type="text" name="employment" id="employment" class="form-control ib-form-non-block" placeholder="Where do you work?" required="">
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="education">Education</label>
+                        <input type="text" name="education" id="education" class="form-control ib-form-non-block" placeholder="Where did you graduate from?" required="">
+                    </div>
+
+                   <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" name="position" id="position" class="form-control ib-form-non-block" placeholder="Whats your current position?" required="">
+                    </div>
+
+                    <!-- <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" name="phone" id="phone" class="form-control" placeholder="Whats your phone number?" required="">
+                    </div> 
+ -->
+                   <div class="form-group">
+                        <label for="inputEmail">Email address</label>
+                        <input type="email" name="email" id="email" class="form-control ib-form-non-block" placeholder="Email address" required="">
+                    </div>
+
+                 <!--    <div class="form-group">
+                        <label for="linkedin">LinkedIn</label>
+                        <input type="text" name="linkedin" id="linkedin" class="form-control ib-form-non-block" placeholder="Your LinkedIn Page" required="">
+                    </div> -->
+                 <button class="btn btn-default" onclick="updateProfile()" >Save</button>
+                </div>
+
+
+                
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $.ajax({
+        type: 'GET',
+        url: '/api_get_profile',
+        success: function(data){
+            console.log("1");
+            console.log(data);
+            // After you create a user, go ahead and login as that user
+            if (data.status == "success"){
+                $('#firstname').attr('value', data.user.firstname);
+                $('#lastname').attr('value', data.user.lastname);
+                $('#employment').attr('value', data.user.employment);
+                $('#email').attr('value', data.user.email);
+                $('#education').attr('value', data.user.education);
+                $('#position').attr('value', data.user.position);
+
+
+                $('#nav-welcome').html(data.user.firstname);
+            } else {
+                alert(data.message);
+            }
+        }
+    });
+
+    function updateProfile() {
+        $.ajax({
+            type: 'PUT',
+            url: '/api_edit_user',
+            data: {
+                firstname: $("#firstname").val(),
+                lastname: $("#lastname").val(),
+                employment: $("#employment").val(),
+                email: $("#email").val(),
+                education: $("#education").val(),
+                position: $("#position").val()
+            },
+            success: function(data){
+                console.log("hi");
+                console.log(data.firstname);
+                console.log(data);
+                if (data.status == "success"){
+                    window.location = "/profile";
+                } else {
+                    alert(data.message);
+                    
+                }
+            }
+        });
+
+    }
+</script>
+
+</body> 
+<html>
+
+

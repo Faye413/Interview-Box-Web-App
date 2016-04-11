@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% include 'header.html' %}
+  <body>
+    <div class="bg-div"></div>
+    <div class="container splash-container">
+        <div class="row button-row">
+            <div class="col-md-offset-3 col-md-6 jumbotron ib-info-box">
+                <form class="form-signin" method="get">
+                    <h2 class="form-signin-heading">Sign up for InterviewBox</h2>
+                    
+                    <div class="form-group">
+                        <label for="username">Username *required</label>
+                        <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password *required</label>
+                        <input type="password" id="password" class="form-control" placeholder="Password" required="">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="firstname">Name *required</label><br>
+                        <input type="text" name="firstname" id="firstname" class="form-control ib-form-non-block" placeholder="First Name" required="">
+                        <input type="text" name="lastname" id="lastname" class="form-control ib-form-non-block" placeholder="Last Name" required="">
+                    </div>
+
+<!--                     <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" name="company" id="company" class="form-control" placeholder="Whats your company?" required="">
+                    </div>
+ -->                    
+                    <div class="form-group">
+                        <label for="education">Education</label>
+                        <input type="text" name="education" id="education" class="form-control" placeholder="Whats your education?" required="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employment">Employment</label>
+
+                        <input type="text" name="employment" id="employment" class="form-control" placeholder="Whats your employment?" required="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" name="position" id="position" class="form-control" placeholder="Whats your current position?" required="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" name="phone" id="phone" class="form-control" placeholder="Whats your phone number?" required="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail">Email address</label>
+                        <input type="text" name="email" id="email" class="form-control" placeholder="Email address" required="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn</label>
+                        <input type="text" name="linkedin" id="linkedin" class="form-control" placeholder="Your LinkedIn Page" required="">
+                    </div>
+
+                    <span class="radio" style="display:inline;">
+                      <label><input type="radio" name="optradio">Interviewer</label>
+                    </span>
+                    <span class="radio" style="display:inline;">
+                      <label><input checked="checked" type="radio" name="optradio" id="is_interviewee">Interviewee</label>
+                    </span>
+
+                    <br>
+                    <br>
+                    
+                    <!-- <input type="hidden" name="go" value="/"> -->
+                </form>         
+                <button class="btn btn-lg btn-primary btn-block" onclick="clickedSignup()">Sign up</button>
+                <br>
+                <a href="index">
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Back</button>
+                </a>
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container -->
+  </body>
+
+  <script type="text/javascript">
+        function clickedSignup() {
+            var is_interviewer = $('#is_interviewee').is(':checked') ? 0 : 1;
+            $.ajax({
+                    type: 'POST',
+                    url: '/api_create_user',
+                    data: {
+                        username: $("#username").val(),
+                        password: $("#password").val(),
+                        firstname: $("#firstname").val(),
+                        lastname: $("#lastname").val(),
+                        position: $("#position").val(),
+                        email: $("#email").val(),
+                        education: $("#education").val(),
+                        employment: $("#employment").val(),
+                        company: $("#company").val(),
+                        phone: $("#phone").val(),
+                        linkedin: $("#linkedin").val(),
+                        is_interviewer: is_interviewer
+                    },
+                    success: function(data){
+                        // After you create a user, go ahead and login as that user
+                        if (data.status == "success"){
+                            $.ajax({
+                                    type: 'POST',
+                                    url: '/api_login',
+                                    data: {
+                                        username: $("#username").val(),
+                                        password: $("#password").val(),
+                                    },
+                                    success: function(data){
+                                        if (data.status == "success"){
+                                            window.location = "/profile";
+                                        } else {
+                                            alert(data.message);
+                                        }
+                                    }
+                            });
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+            });
+            // window.location = "success?go=/&message=Successfully registered.";
+            // window.location.href = "success?go=/&message=Successfully registered.";
+        }
+  </script>
+</html>

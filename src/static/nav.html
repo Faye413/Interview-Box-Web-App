@@ -1,0 +1,64 @@
+<div id="custom-bootstrap-menu" class="navbar navbar-default " role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header"><a class="navbar-brand" href="#">InterviewBox</a>
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-menubuilder"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+            </button>
+        </div>
+        <div class="collapse navbar-collapse navbar-menubuilder">
+            <ul class="nav navbar-nav navbar-left">
+<!--                 <li>
+                    <a id="nav-welcome" href="">Hi, Jerry</a>
+                </li>
+ -->                <li>
+                    <a href="profile">Profile</a>
+                </li>
+                <li class="search-nav">
+                    <a href="search">Search</a>
+                </li>
+                <li class="interviewer-nav">
+                    <a href="schedule">Set Availability</a>
+                </li>
+                <li>
+                    <a href="contact">Contact Us</a>
+                </li>
+            </ul>
+            <button class="btn btn-default" onclick="clickedLogout()" style="float:right; margin: 10px auto;">Logout</button>
+
+        </div>
+
+     <script type="text/javascript">
+         $('.interviewer-nav').hide();
+         $('.search-nav').hide();
+
+        $.ajax({
+            type: 'GET',
+            url: '/api_get_profile',
+            success: function(data){
+                // After you create a user, go ahead and login as that user
+                // console.log(data.user);
+                if (data.status == "success"){
+                    if (data.user.is_interviewer == 1){
+                        $('.interviewer-nav').show();
+                    } else {
+                        $('.search-nav').show();
+                    }
+                } else {
+                    alert(data.message);
+                }
+            }
+        });
+
+        function clickedLogout() {
+            $.ajax({
+                type: 'POST',
+                url: '/api_logout',
+                success: function(data){
+                    // After you create a user, go ahead and login as that user
+                    window.location = "/";
+                }
+            });
+            // window.location.href = "success?go=/&message=Successfully registered.";
+        }
+  </script>
+    </div>
+</div>

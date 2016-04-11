@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'header.html' %}
+<body>
+<div class="bg-dashboard">
+    <div>{% include 'nav.html' %}</div>
+    <div class="container page-container profile-page" >
+
+        <h2>Set your weekly availability</h2> <button class="btn btn-default" onclick="submitSchedule()" style="float:right; margin: 10px auto;">Click to update</button>
+        <div class="row" >
+            <table class="table table-bordered" id="schedule">
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+
+function updateSchedule(){
+     $.ajax({
+        type: 'GET',
+        url: '/api_availability',
+        success: function(data){
+            if (data.status == "success"){
+                for (var x in data.availability){
+                    console.log(data.availability[x]);
+                    $('#' + data.availability[x]).prop("selected", "true");
+                    $('#' + data.availability[x]).css('background-color', '#67E678');
+                }
+            } else {
+                alert(data.message);
+            }
+        }
+    });
+}
+
+function submitSchedule(){
+    times = []
+    $('.tdselect').each(function(idx){
+        if ($(this).prop("selected") == "true"){
+            times.push($(this).attr('id'));
+        }
+    });
+
+     $.ajax({
+        type: 'PUT',
+        url: '/api_availability',
+        data: {
+            availability: times.join(';') 
+        },
+        success: function(data){
+            if (data.status == "success"){
+                window.location = "/profile";
+            } else {
+                alert(data.message);
+            }
+        }
+    });
+}
+
+function convertTime(x){
+    time = "";
+    tmp = Math.floor(x/2);
+    if (tmp == 0 || tmp == 24)
+        time = "12";
+    else
+        time = tmp;
+
+    if (x%2 == 1)
+        time += ":30";
+    else
+        time += ":00";
+
+    if (x > 23 && x != 48)
+        return time + " PM";
+    else
+        return time + " AM" ;
+}
+
+var table = $('#schedule');
+var weekdays = ["Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."];
+
+var thead = $('<thead>');
+var tr = $('<tr>');
+for (w in weekdays){
+    tr.append('<th>' + weekdays[w] + '</th>');
+}
+
+thead.append(tr);
+table.append(thead)
+var tbody =  $('<tbody>');
+
+for (var i = 0; i < 48; i++){
+    tr = $('<tr>');
+
+    // table.append('<tr>')
+    for (w in weekdays){
+        td = $('<td class="tdselect" id= ' + ((w * 48) + i) + '>');
+        // div = $('<div class="checkbox">')
+
+        td.prop("selected", "false");
+        td.html(convertTime(i) + ' - ' + convertTime(i + 1));
+        td.click(function(){
+            console.log('hi');
+            console.log($(this).prop('selected'));
+            if ($(this).prop("selected") == "false"){
+                $(this).prop("selected", "true");
+                $(this).css('background-color', '#67E678');
+            } else {
+                $(this).prop("selected", "false");
+                $(this).css('background-color', '');
+            }
+        });
+
+        // td.append(div);
+        tr.append(td);
+        // div.append('<label><input id= ' + ((w * 48) + i) + ' type="checkbox" value="">' + convertTime(i) + ' - ' + convertTime(i + 1) + '</label>');
+    }
+    tbody.append(tr)
+}
+table.append(tbody)
+
+updateSchedule();
+// $('.tdselect').dragCheck();
+
+</script>
+</body> 
+<html>
+
+
+
+

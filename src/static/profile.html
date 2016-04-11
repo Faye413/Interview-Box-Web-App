@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'header.html' %}
+<body>
+<div class="bg-dashboard">
+    {% include 'nav.html' %}
+    <div class="container page-container profile-page">
+        <div class="row">
+            {% include 'interview.html' %}
+            <div class="col-xs-12 col-md-6 ib-info-box">
+<!--                 <div class="col-xs-4">
+                    <img src="{{ url_for('static', filename='img/Jerry.jpg') }}" alt="Jerry Pic" style="width:120px;height:120px" align="left">
+                </div>
+ -->                
+                <div class="col-xs-12">
+                    Name: <span id="name"></span> <br>
+                    Company:  <span id="employment"></span>  <br>
+                    Education: <span id="education"></span>  <br>
+                    Position: <span id="position"></span>  <br>
+                    Email:    <span id="email"></span>  <br>
+                    <!-- Phone:    <span id="phone"></span>  <br> -->
+                    Linkedin: <a href="https://www.linkedin.com"><img src="{{ url_for('static', filename='img/linkedin.png') }}" alt="linkedin pic" style="width:25px;height:25px" > </a>
+                </div>
+                <br>
+                <div class="col-xs-12">
+                    <a href="edit_profile" class="btn btn-default">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $.ajax({
+            type: 'GET',
+            url: '/api_get_profile',
+            success: function(data){
+                // After you create a user, go ahead and login as that user
+                // console.log(data.user);
+                if (data.status == "success"){
+                    $('#employment').html(data.user.employment);
+                    $('#education').html(data.user.education);
+                    $('#position').html(data.user.position);
+                    $('#email').html(data.user.email);
+                    $('#name').html(data.user.firstname + ' ' + data.user.lastname);
+                    // $('#phone').html(data.user.phone);
+
+                    // $('#nav-welcome').html("Hi, " + data.user.firstname);
+                } else {
+                    alert(data.message);
+                }
+            }
+    });
+
+</script>
+
+</body> 
+<html>
+
+

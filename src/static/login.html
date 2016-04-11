@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% include 'header.html' %}
+  <body>
+    <div class="bg-div"></div>
+    <div class="container splash-container">
+        <!-- /.row -->
+
+        <div class="row button-row">
+            <div class="col-md-offset-3 col-md-6 jumbotron ib-info-box">
+                <form class="form-signin" method="post">
+                    <h2 class="form-signin-heading">Please sign in</h2>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" id="username" class="form-control" placeholder="Username" required="" autofocus="">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Password" required="">
+                    </div>
+
+
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" value="remember-me"> Remember me
+                      </label>
+                    </div>
+
+                </form>           
+                    <button class="btn btn-lg btn-primary btn-block" onclick="clickedLogin()" type="submit">Sign in</button>
+
+                <br>  
+                <a href="/">
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Back</button>
+                </a>
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container -->
+
+    <script>
+    function clickedLogin() {
+        $.ajax({
+            type: 'POST',
+            url: '/api_login',
+            data: {
+                username: $("#username").val(),
+                password: $("#password").val(),
+            },
+            success: function(data){
+                if (data.status == "success"){
+                    window.location = "/profile";
+                } else {
+                    alert(data.message);
+                }
+            }
+        });
+    }
+    </script>
+  </body>
+</html>

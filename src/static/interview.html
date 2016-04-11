@@ -1,0 +1,156 @@
+<div class="col-xs-12 col-md-6">
+	<div class="row">
+	    <div class="col-xs-12 ib-info-box">
+	        <h2>
+	            Upcoming Interviews:
+	        </h2>
+	        <div id="future-interviews">
+	            There's no upcoming Interview
+	        </div>
+	    </div>
+	</div>
+
+	<div class="row">
+	    <div class="col-xs-12 ib-info-box">
+	        <h2>
+	            Past Interviews:
+	        </h2>
+	        <div id="past-interviews">
+	            There's no past Interview
+	        </div>
+	    </div>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">Feedback</h4>
+	      </div>
+	      <div class="modal-body">
+	        <div id="interview-feedback">
+	        	There is no feedback for this interview.
+	        </div>
+	        <br>
+	        <textarea id="feedback-textarea" rows="4" cols="50" placeholder="Leave your feedback here for the interview."></textarea>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        <button onclick="handleAddFeedback()" type="button" class="btn btn-default">Add Feedback</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+</div>
+
+<script type="text/javascript">
+	var globalInterviewId = null;
+	var pastInterviews = []
+
+	$.ajax({
+        type: 'GET',
+        url: '/api_upcoming_interviews',
+        success: function(data){
+            console.log('interview', data);
+            $("#future-interviews").html("")
+            for (var i in data['interviews']){
+            	interview = data['interviews'][i];
+            	timeString = timeConverter(interview['date']);
+            	$("#future-interviews").append("<div>Interview with " + interview['person_firstname'] + " at "+timeString+" <a href='http://hangouts.google.com/onair'>Go to interview</a></div>");
+            }
+        }
+    });
+
+	$.ajax({
+        type: 'GET',
+        url: '/api_past_interviews',
+        success: function(data){
+            console.log('past', data);
+            $("#past-interviews").html("")
+            pastInterviews = data['interviews'];
+            for (var i in data['interviews']){
+            	interview = data['interviews'][i];
+            	timeString = timeConverter(interview['date']);
+            	$("#past-interviews").append("<div>You had an interview with " + interview['person_firstname'] + " at "+timeString+" <a href='#' id='add-feedback-button-"+interview['id']+"' onclick='showFeedback(this.id)' data-interview-id='"+ interview['id'] +"' data-toggle='modal' data-target='#myModal'>View/Add Feedback</a></div>");
+            }
+        }
+    });
+
+    function showFeedback(buttonId){
+    	$("#interview-feedback").html("");
+    	globalInterviewId = $("#" + buttonId).attr('data-interview-id');
+    	pastInterviewId = findPastInterviewIndexById(globalInterviewId)
+    	if (pastInterviews[pastInterviewId]['feedback'].length != 0) {
+			for (var j in pastInterviews[pastInterviewId]['feedback']) {
+				appendFeedbackToFeedbackList(pastInterviews[pastInterviewId]['feedback'][j]);
+			}	
+		} else {
+			appendFeedbackToFeedbackList("There is no feedback yet for this interview.")
+		}
+    	console.log('globalInterviewId', globalInterviewId)
+    }
+
+   	function findPastInterviewIndexById(pastId){
+   		for (var i in pastInterviews){
+    		if (pastInterviews[i]['id'] == globalInterviewId) {
+    			return i;
+    		}
+    	}
+   	}
+
+    function handleAddFeedback(){
+    	feedbackText = $('textarea#feedback-textarea').val().trim();
+    	if (feedbackText == "") {
+    		return;
+    	}
+    	$('textarea#feedback-textarea').val("");
+    	if (pastInterviews[findPastInterviewIndexById(globalInterviewId)]['feedback'].length == 0) {
+			$("#interview-feedback").html("");
+    	}
+
+    	appendFeedbackToFeedbackList(feedbackText);
+    	pastInterviews[findPastInterviewIndexById(globalInterviewId)]['feedback'].push(feedbackText);
+		$.ajax({
+            type: 'POST',
+            url: '/api_add_interview_feedback',
+            data: {
+                id: globalInterviewId,
+                feedback: feedbackText
+            },
+            success: function(data){
+            	console.log(data);
+            }
+        });
+    }
+
+    function appendFeedbackToFeedbackList(text){
+    	$("#interview-feedback").append("<div>"+text+"</div>")
+    }
+
+    function timeConverter(UNIX_timestamp){
+		var a = new Date(UNIX_timestamp * 1000);
+		var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+		var year = a.getFullYear();
+		var month = months[a.getMonth()];
+		var date = a.getDate();
+		var hour = a.getHours();
+		var min = a.getMinutes();
+
+		hour = String(hour);
+		if (hour.length == 1) {
+			hour = '0' + hour;
+		}
+		
+
+		min = String(min);
+		if (min.length == 1) {
+			min = '0' + min
+		}
+		// var sec = a.getSeconds();
+		var time = hour + ':' + min + ' on ' + date + ' ' + month + ', ' + year;
+		return time;
+	}
+</script>
